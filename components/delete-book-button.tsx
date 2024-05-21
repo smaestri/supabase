@@ -10,11 +10,12 @@ export function DeleteBook({ id }: { id: number }) {
     const [formState, action] = useFormState(deleteBookAction, { message: '' })
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
   
-    useEffect(() => {
-      if (formState.message) {
-        onOpen()
-      }
-    }, [formState, onOpen])
+    //TODO
+    // useEffect(() => {
+    //   if (formState.message) {
+    //     onOpen()
+    //   }
+    // }, [formState, onOpen])
   
     return (<>
       <form action={action}>

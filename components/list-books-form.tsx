@@ -6,14 +6,16 @@ import { UpdateBook } from "./update-book-button";
 import { DeleteBook } from "./delete-book-button";
 
 interface ListBooksFormProps {
-  books: BookWithCategoryAndUser[]
+  // books: BookWithCategoryAndUser[]
+  books: any
   userId?: string
+
 }
 
 export default function ListBooksForm({ books, userId}: ListBooksFormProps) {
   return (<>
     <div className="flex flex-wrap gap-4 mt-5 mb-5">
-    {books?.map((book: BookWithCategoryAndUser) => (
+    {books?.map((book: any) => (
       <div
         key={book.id}
         className="flex flex-col"
@@ -28,7 +30,7 @@ export default function ListBooksForm({ books, userId}: ListBooksFormProps) {
         </div>
         <div>Auteur: <span className="italic">{book.author}</span></div>
         <div>Catégorie: <span className="italic">{book.category.name}</span></div>
-        <div>Propriétaire: <span className="italic">{book.user.email}</span></div>
+        <div>Propriétaire: <span className="italic">todo</span></div>
         <div>Statut:{" "}
           {book.status === 'FREE' ? (
             <span className="italic">
@@ -46,7 +48,7 @@ export default function ListBooksForm({ books, userId}: ListBooksFormProps) {
           <BorrowBook id={book.id} status={book.status} />}
         </div>
         <div className="">
-          {userId && book.userId === userId && 
+          {/* {userId && book.userId === userId &&  */}
           <div className="flex flex-col items-center gap-2">
             <div>
             <UpdateBook id={book.id} />
@@ -55,7 +57,7 @@ export default function ListBooksForm({ books, userId}: ListBooksFormProps) {
             <DeleteBook id={book.id} />
             </div>
           </div>
-          }
+          {/* } */}
         </div>
         <div>
           {!userId && <div>Connectez-vous pour emprunter!{userId}</div>}

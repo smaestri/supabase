@@ -1,8 +1,7 @@
 "use client"
 import React from 'react';
-import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
+import { Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
 import { useRouter } from 'next/navigation'
-import { signOut } from '@/lib/actions';
 
 interface AccountProps {
   avatarSrc?: string
@@ -12,7 +11,15 @@ interface AccountProps {
 export default function Account({ avatarSrc, mail }: AccountProps) {
   const router = useRouter()
 
+  async function signInWithGithub() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+    })
+  }
+
   return (
+    <>
+    <Button>LOGIN WITH GITHUB</Button>
     <Dropdown placement="bottom-end">
       <DropdownTrigger>
         <Avatar
@@ -25,7 +32,7 @@ export default function Account({ avatarSrc, mail }: AccountProps) {
       </DropdownTrigger>
       <DropdownMenu aria-label="Profile Actions" variant="flat" onAction={(key) => {
         if (key === "logout") {
-          signOut();
+          // signOut();
           router.push("/")
         }
       }}>
@@ -40,5 +47,7 @@ export default function Account({ avatarSrc, mail }: AccountProps) {
         </DropdownItem>
       </DropdownMenu>
     </Dropdown>
+    </>
+
   )
 }
