@@ -1,14 +1,6 @@
-import { Button } from "@nextui-org/react";
+import Home from "./main";
 
-export default async function Home() {
-
-  // const session = await auth();
-
-  return (<>
-    <div>Bienvenur sur sharebook</div>
-
-    {/* {session?.user ? <div>{JSON.stringify(session.user)}</div> : <div>Signed out</div>} */}
-
-  </>
-  )
+export default async function Homepage() {
+  console.log('HOMEPAGE')
+  return (<Home/>)
 }

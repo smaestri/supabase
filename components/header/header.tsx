@@ -1,10 +1,10 @@
-import Account from "./account";
 import Link from "next/link";
-import { Button, Navbar, NavbarBrand, NavbarContent, Image } from "@nextui-org/react";
+import { Navbar, NavbarBrand, NavbarContent, Image } from "@nextui-org/react";
 import SearchInput from "./search-input";
+import AccountPage from "./account-page";
 
-export default async function Header() {
-  // const session = await auth();
+export default function Header() {
+  console.log('loading header')
   return (
     <Navbar isBordered maxWidth={'full'}>
       <NavbarContent justify="start">
@@ -18,12 +18,7 @@ export default async function Header() {
 
       <NavbarContent as="div" className="items-center" justify="end">
         <SearchInput />
-        {/* {session?.user ?  */}
-        <Account
-          avatarSrc={undefined}
-          mail={undefined} /> :
-          {/* <form action={signIn}><Button type="submit">Sign In</Button>
-          </form> */}
+        <AccountPage />
       </NavbarContent>
     </Navbar>
   )
