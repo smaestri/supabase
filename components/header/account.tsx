@@ -49,7 +49,7 @@ export default function Account({ avatarSrc, mail }: AccountProps) {
   // }
 
   return (
-    <>
+    <><Link href="/my-books">Mes livres</Link>
       {!userConnected &&  <Button onClick={signInWithGoogle}>Sign In with Google</Button>}
 
       {!userConnected &&  <Button onClick={signInWithGithub}>Sign In with github</Button>}
@@ -73,7 +73,7 @@ export default function Account({ avatarSrc, mail }: AccountProps) {
             <p className="font-semibold">Signed in as</p>
             <p className="font-semibold">{mail}</p>
           </DropdownItem>
-          <DropdownItem ><Link href="/my-books">Mes livres</Link> </DropdownItem>
+          <DropdownItem > </DropdownItem>
           <DropdownItem ><Link href="/borrows">Mes emprunts</Link></DropdownItem>
           <DropdownItem key="logout" color="danger">
             Log Out

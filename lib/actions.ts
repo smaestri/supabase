@@ -29,7 +29,8 @@ interface CreateBookFormState {
 //     return auth.signOut()
 // }
 
-const saveUser = async (supabase: any, userId: any) => {
+const saveUser = async (supabase: any, userId: any, userName: string) => {
+    console.log('saving user with id ', userId , " and name " + userName)
     let { data: user } = await supabase
         .from("user")
         .select("*").eq("user_id", userId);
@@ -38,10 +39,38 @@ const saveUser = async (supabase: any, userId: any) => {
         const { error: userError } = await supabase
             .from('user')
             .insert({
-                user_id: userId
+                user_id: userId,
+                user_name: userName
             })
         console.log('error when saving user ', userError)
     }
+}
+
+export const saveCity = async (formState: any, formData: any) => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    console.log('save city with city ', formData.get('city') + " and cp " + formData.get('cp') )
+
+    const { error: errorCity } = await supabase
+    .from('user')
+    .update({
+        cp: formData.get('cp'),
+        city: formData.get('city'),
+    })
+    .eq('user_id', user?.id)
+
+
+    if(errorCity) {
+        console.log('error when updating city / cp')
+        return 'KO';
+    }
+    return 'OK';
+
+
+
+
+
 }
 
 
@@ -63,7 +92,7 @@ const saveBook = async (supabase: any, formData: any) => {
                 title: formData.get('title'),
                 author: formData.get('author'),
                 category_id: formData.get('category'),
-                image: formData.get('image')
+                image: formData.get('image'),
             })
         
             if (error) {
@@ -87,19 +116,22 @@ const saveBook = async (supabase: any, formData: any) => {
 
 }
 
-const attachBookToUser = async (supabase: any, isbn: string, userId: any) => {
+const attachBookToUser = async (supabase: any, isbn: string, userId: any, state: string | null, price: number) => {
     let { data: bookWithCategory } = await supabase
         .from("user_book")
         .select("*")
             .eq("user_id", userId)
             .eq("book_isbn", isbn);
     if (!bookWithCategory || bookWithCategory.length == 0) {
-        console.log('user_book nto found, inserting with isbn', isbn, " and userId " + userId )
+        console.log('user_book not found, inserting with isbn', isbn, " and userId " + userId,  " and state " + state ,  " and price ", price)
         const { error } = await supabase
             .from('user_book')
             .insert({
                 book_isbn: isbn,
-                user_id: userId
+                user_id: userId,
+                state,
+                price
+
             })
         console.log('error when saving user_book ', error)
     }
@@ -112,12 +144,14 @@ export async function createBook(formState: CreateBookFormState, formData: FormD
     console.log('create' + formData.get('isbn') + formData.get('title') + formData.get('author')  + formData.get('category') + formData.get('image'))
     const { data: { user } } = await supabase.auth.getUser();
 
+console.log('user retrieved from oauth', (JSON.stringify(user)))
+
     try {
-        await saveUser(supabase, user?.id)
+        await saveUser(supabase, user?.id, user?.user_metadata["full_name"])
         const book: BookWithCategory = await saveBook(supabase, formData)
         console.log('book inserted', book)
         console.log('isbn', book.isbn)
-        await attachBookToUser(supabase, book.isbn, user?.id)
+        await attachBookToUser(supabase, book.isbn, user?.id, formData.get('state') as string,  formData.get('price') as string)
     } catch (err: unknown) {
         if (err instanceof Error) {
             return {
@@ -137,90 +171,25 @@ export async function createBook(formState: CreateBookFormState, formData: FormD
     redirect('/my-books')
 }
 
-export async function updateBook(bookId: number, formState: CreateBookFormState, formData: FormData): Promise<CreateBookFormState> {
-    // const session = await auth.auth()
-    // if (!session || !session.user) {
-    //     return {
-    //         errors: {
-    //             _form: ["Please login"]
-    //         }
-    //     }
-    // }
-
-    console.log('tutu')
-
-    const result = createBookSchema.safeParse({
-        title: formData.get('title'),
-        author: formData.get('author'),
-        category: formData.get('category')
-    })
-
-    console.log('result', JSON.stringify(result))
-    console.log('result.success', result.success)
-    console.log('bookId', bookId)
-
-
-    if (!result.success) {
-        return {
-            errors: result.error.flatten().fieldErrors
-        }
-    }
-
-    let book: any;
-
-    const supabase = createClient();
-
-    const { error } = await supabase
-        .from('books')
-        .update({
-            title: result.data.title,
-            author: result.data.author,
-            category_id: result.data.category,
-        })
-        .eq('id', bookId)
-    // } catch (err: unknown) {
-    //     if (err instanceof Error) {
-    //         return {
-    //             errors: {
-    //                 _form: [err.message]
-    //             }
-    //         }
-    //     } else {
-    //         return {
-    //             errors: {
-    //                 _form: ['Something went wrong']
-    //             }
-    //         }
-    //     }
-    // }
-
-    console.log('error', error)
-
-    revalidatePath('/my-books')
-    redirect('/my-books')
-}
-
 export async function deleteBook(id: number) {
-    // check if book already borrowed
-    // const book = await db.book.findFirst({
-    //     where: {
-    //         id
-    //     }
-    // })
-    console.log('delete book')
-    const book: any = {}
-    if (book?.status === "BORROWED") {
-        return {
-            message: "The book is currently being borrowed, you can't delete it!"
-        }
 
-    }
+    console.log('deleting user book with id ' + id)
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     const { error } = await supabase
-        .from('books')
+        .from('user_book')
         .delete()
         .eq('id', id)
+
+    // console.log('delete book')
+    // const book: any = {}
+    // if (book?.status === "BORROWED") {
+    //     return {
+    //         message: "The book is currently being borrowed, you can't delete it!"
+    //     }
+
+    // }
 
     console.log('error', error)
 

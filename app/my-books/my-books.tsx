@@ -2,12 +2,6 @@ import Link from "next/link";
 import ListBooksForm from "@/components/list-books-form";
 import { Button } from "@nextui-org/react";
 import { createClient } from "@/utils/supabase/server";
-import { useUserContext } from "../AuthProvider";
-
-// const booksWithCategory = Prisma.validator<Prisma.BookDefaultArgs>()({
-//   include: { category: true, user: true },
-// })
-// export type BookWithCategoryAndUser = Prisma.BookGetPayload<typeof booksWithCategory>
 
  export type BookWithCategoryAndUser = any
 
@@ -17,45 +11,28 @@ export default async function MyBooks() {
   if(!user?.id){
     return <div>Please connect</div>
    }
-    let { data: books, error } = await supabase
+    let { data: userBooks, error } = await supabase
     .from("user_book")
     .select("*, user(*), book(*, category(*))")
     .eq("user_id", user?.id)
     ;
-     console.log('books', books)
+     console.log('books', userBooks)
     if(error){
       console.log('error books fetched', error)
     }
 
-    // let { data: test, error : er } = await supabase
-    // .from("user_book")
-    // .select("*, user(*), book(*, category(*))")
-    // .eq("user_id", user?.id)
-    // ;
+    let askCity = false
+    if(userBooks && userBooks?.length > 0 && !userBooks[0].user.city) {
+      askCity = true
+    }
 
-    // console.log('test', test)
-
-
-    const finalBooks = books?.map(item => ({bookInfo:item.book, userInfo: item.user}))
-
-
+    const finalBooks = userBooks?.map(item => ({id : item.id, state: item.state, price: item.price, bookInfo:item.book, userInfo: item.user}))
     console.log('books fetched', JSON.stringify(finalBooks))
 
-    // const { data: books } = await supabase.from("books").select();
- // books = []
-  // books = await db.book.findMany({
-  //   where: {
-  //     userId: session.user.id
-  //   },
-  //   include: {
-  //     category: true,
-  //     user: true
-  //   }
-  // });
   return (
     <>
       <h1 className="text-2xl">Mes livres</h1>
-      <ListBooksForm userId={user?.id} books={finalBooks} />
+      <ListBooksForm userId={user?.id} books={finalBooks} askCity={askCity} />
       <Link href="my-books/new">
         <Button>Créer un livre</Button>
       </Link>
