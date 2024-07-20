@@ -24,12 +24,18 @@ const states = [
   { id: "AVERAGE", label: "Moyen" },
   { id: "BAD", label: "Mauvais état" }]
 
+  const places = [
+    { id: "SELLER_HOME", label: "A mon adresse" },
+    { id: "TO_DEFINED", label: "A définir avec le demandeur" },
+  ]
+
 export default function CreateEditBookForm({ categories, book, userId }: CreateEditBookFormProps) {
   // need to transform ID in string to display Select correctly
   //const categoriesFormatted = categories.map((cat: any) => ({ ...cat, id: cat.id.toString() }))
 
   const [fetchedBook, setFetchedBook] = useState<BookWithCategory>();
   const [loading, setLoading] = useState<boolean>();
+  const [showPrice, setShowPrice] = useState<boolean>(false);
 
   const [formState, action] = useFormState(createBook, {
     errors: {}
@@ -65,6 +71,16 @@ export default function CreateEditBookForm({ categories, book, userId }: CreateE
 
   }
 
+  const togglePrice = (event: any)=> {
+    console.log(event.target.value)
+    if(event.target.value === "sell") {
+      setShowPrice(true)
+      return
+    }
+    setShowPrice(false)
+  }
+
+  console.log('show proce', showPrice)
   const renderBookForm = () => {
 
     return (<form action={action}>
@@ -88,10 +104,19 @@ export default function CreateEditBookForm({ categories, book, userId }: CreateE
           <SelectItem key={state.id} value={state.id} >{state.label}</SelectItem>
         )}
       </Select>
-      <RadioGroup>
-        <Radio value='sell' >Je le vends</Radio><span>Prix: <Input name="price" placeholder="prix"/></span>
+      <Select
+        label="Lieu de la vente / du don"
+        items={places}
+        name="place">
+        {(place: any) => (
+          <SelectItem key={place.id} value={place.id}>{place.label}</SelectItem>
+        )}
+      </Select>
+      <RadioGroup orientation="horizontal" onChange={togglePrice}>
+        <Radio value='sell' >Je le vends</Radio>
         <Radio value='give' >Je le donne</Radio>
       </RadioGroup>
+      {showPrice && <span>Prix: <Input name="price" placeholder="prix"/></span>}
       <FormButton>Save</FormButton>
       {formState.errors._form ? <div className="p-2 bg-red-200 border border-red-400">{formState.errors._form?.join(', ')}</div> : null}
     </form>)

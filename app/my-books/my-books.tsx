@@ -26,7 +26,7 @@ export default async function MyBooks() {
       askCity = true
     }
 
-    const finalBooks = userBooks?.map(item => ({id : item.id, state: item.state, price: item.price, bookInfo:item.book, userInfo: item.user}))
+    const finalBooks = userBooks?.map(item => ({id : item.id, place: item.place, state: item.state, price: item.price, bookInfo:item.book, userInfo: item.user}))
     console.log('books fetched', JSON.stringify(finalBooks))
 
   return (

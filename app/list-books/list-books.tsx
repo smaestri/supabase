@@ -1,6 +1,7 @@
 import ListBooksForm from "@/components/list-books-form";
 import { ListBooksProps } from "./page";
 import { createClient } from "@/utils/supabase/server";
+import { BOOK_STATUS } from "@/lib/constants";
 export type BookWithCategoryAndUser = any
 
 export default async function ListBooks({ searchParams }: ListBooksProps) {
@@ -15,12 +16,13 @@ export default async function ListBooks({ searchParams }: ListBooksProps) {
     .from("user_book")
     .select("*, user!inner(*), book!inner(*, category!inner(*))")
     .neq("user_id", user?.id)
-    .eq("book.category_id", searchParams.categoryId);
+    .eq("book.category_id", searchParams.categoryId)
+    .eq("status", BOOK_STATUS.FREE);
     console.log(userBooks?.length + " books found :" + JSON.stringify(userBooks))
 
     console.log('userBooks', userBooks)
 
-    const finalBooks = userBooks?.map(item => ({id : item.id, state: item.state, price: item.price, bookInfo:item.book, userInfo: item.user}))
+    const finalBooks = userBooks?.map(item => ({id : item.id, place: item.place, state: item.state, price: item.price, bookInfo:item.book, userInfo: item.user}))
 
   return (<>
     <h1 className="text-2xl">Books for category "{category?.name}"</h1>

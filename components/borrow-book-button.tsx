@@ -1,15 +1,16 @@
-import { borrowBook } from "@/lib/actions";
+import { purchaseBook } from "@/lib/actions";
 import FormButton from "./form-button";
 import clsx from "clsx";
+import { BOOK_STATUS } from "@/lib/constants";
 
-export function BorrowBook({ id, status }: { id: number, status: string }) {
-    const borrowBookAction = borrowBook.bind(null, id)
+export function BorrowBookButton({ id, status }: { id: number, status: string }) {
+    const borrowBookAction = purchaseBook.bind(null, id)
   
     return (
       <form action={borrowBookAction}>
         <FormButton disabled={status === 'BORROWED'} className={clsx(
           {
-            "": status === 'FREE',
+            "": status === BOOK_STATUS.FREE,
             'cursor-not-allowed': status === 'BORROWED',
           },
         )}>Borrow</FormButton>

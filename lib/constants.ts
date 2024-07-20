@@ -1,0 +1,12 @@
+
+export const BOOK_STATUS = {
+    FREE: "FREE",
+    PURCHASED: "PURCHASED"
+}
+
+export const BORROW_STATUS = {
+    VALIDATED: "VALIDATED",
+    CLOSED: "CLOSED",
+    CANCELLED: "CANCELLED",
+    PENDING: "PENDING"
+}

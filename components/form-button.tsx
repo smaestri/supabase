@@ -8,6 +8,7 @@ interface FormButtonProps {
   children: ReactNode
   disabled?: boolean
   className?: string
+  toggleBorrowModal?: any
 }
 
 export default function FormButton({ children, className, disabled = false }: FormButtonProps) {

@@ -47,9 +47,9 @@ export default function Account({ avatarSrc, mail }: AccountProps) {
   // if (loading) {
   //   return <div>Laoding ...</div>
   // }
-
+console.log('userConnected', userConnected)
   return (
-    <><Link href="/my-books">Mes livres</Link>
+    <><Link href="/my-books">Mes livres</Link><Link href="/purchases">Mes achats</Link><Link href="/sales">Mes ventes</Link>
       {!userConnected &&  <Button onClick={signInWithGoogle}>Sign In with Google</Button>}
 
       {!userConnected &&  <Button onClick={signInWithGithub}>Sign In with github</Button>}
@@ -70,11 +70,12 @@ export default function Account({ avatarSrc, mail }: AccountProps) {
           }
         }}>
           <DropdownItem key="profile" className="h-14 gap-2">
-            <p className="font-semibold">Signed in as</p>
+            <p className="font-semibold">Signed in as {userConnected.email}</p>
             <p className="font-semibold">{mail}</p>
           </DropdownItem>
           <DropdownItem > </DropdownItem>
-          <DropdownItem ><Link href="/borrows">Mes emprunts</Link></DropdownItem>
+          <DropdownItem ></DropdownItem>
+          <DropdownItem ></DropdownItem>
           <DropdownItem key="logout" color="danger">
             Log Out
           </DropdownItem>

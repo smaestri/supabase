@@ -1,9 +1,11 @@
 "use client"
 import Image from "next/image"
-import { BorrowBook } from "./borrow-book-button";
+import { BorrowBookButton } from "./borrow-book-button";
 import { DeleteBook } from "./delete-book-button";
 import ModalCity from "./ModalCity";
 import { useState } from "react";
+import { Button, Link } from "@nextui-org/react";
+import { BOOK_STATUS } from "@/lib/constants";
 
 interface ListBooksFormProps {
   books: any
@@ -12,10 +14,13 @@ interface ListBooksFormProps {
 
 }
 
-export default function ListBooksForm({ books, userId, askCity}: ListBooksFormProps) {
+export default function ListBooksForm({ books, userId, askCity }: ListBooksFormProps) {
 
   const [modalOpen, setModalOpen] = useState(askCity);
-  
+
+  // const [modalBorrowOpen, setModalBorrowOpen] = useState(false);
+
+  console.log('books', books)
   return (<>
 
     <div className="flex flex-wrap gap-4 mt-5 mb-5">
@@ -43,7 +48,7 @@ export default function ListBooksForm({ books, userId, askCity}: ListBooksFormPr
           <div>Etat: {userBook.state}</div>
           <div>Prix: {userBook.price}</div>
           <div>Statut:{" "}
-            {userBook.status === 'FREE' ? (
+            {!userBook.status || userBook.status === BOOK_STATUS.FREE ? (
               <span>
                 Libre
               </span>
@@ -54,9 +59,23 @@ export default function ListBooksForm({ books, userId, askCity}: ListBooksFormPr
               </span>
             ) : null}
           </div>
+          <div>Mode d'échange souhaité:{" "}
+            {userBook.place === 'SELLER_HOME' ? (
+              <span>
+                Au domicile du vendeur
+              </span>
+            ) : null}
+            {userBook.place === 'TO_DEFINED' ? (
+              <span>
+                A définir au moment de la demande
+              </span>
+            ) : null}
+          </div>
           <div className="flex flex-col items-center mt-2">
             {userId && userBook.userInfo.user_id !== userId &&
-              <BorrowBook id={userBook.bookInfo.id} status={userBook.bookInfo.status} />}
+              <Link href={`purchases/new?bookId=${userBook.id}`}>
+                <Button>Acheter</Button>
+              </Link>}
           </div>
           <div className="">
             {userId && userBook.userInfo.user_id === userId &&
@@ -73,7 +92,7 @@ export default function ListBooksForm({ books, userId, askCity}: ListBooksFormPr
         </div>
       ))}
     </div>
-    <ModalCity isOpen={!!modalOpen} onClose={()=>{setModalOpen(false)}} />
+    <ModalCity isOpen={!!modalOpen} onClose={() => { setModalOpen(false) }} />
 
   </>)
 
