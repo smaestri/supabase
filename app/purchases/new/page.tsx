@@ -4,6 +4,16 @@ import { purchaseBook } from "@/lib/actions"
 import { Calendar, Select, SelectItem, Textarea } from "@nextui-org/react"
 import { useState } from "react"
 
+export const times = [
+  { id: '10_to_12', label: '10h à midi' },
+  { id: '12_to_14', label: '12h à 14h' },
+  { id: '14_to_16', label: '14h à 16h' },
+  { id: '16_to_18', label: '16h à 18h' },
+  { id: '18_to_20', label: '18h à 20h' },
+  { id: '20_to_22', label: '20h à 22h' }
+
+]
+
 const Borrow = ({ searchParams }: { searchParams: any }) => {
 
   const [firstDate, setFirstDate] = useState<any>({
@@ -49,15 +59,7 @@ const Borrow = ({ searchParams }: { searchParams: any }) => {
 
 const Choice = ({ title, setDate, timeFieldName }: { title: string, setDate: any, timeFieldName: string }) => {
 
-  const times = [
-    { id: '10_to_12', label: '10h à midi' },
-    { id: '12_to_14', label: '12h à 14h' },
-    { id: '14_to_16', label: '14h à 16h' },
-    { id: '16_to_18', label: '16h à 18h' },
-    { id: '18_to_20', label: '18h à 20h' },
-    { id: '20_to_22', label: '20h à 22h' }
-
-  ]
+ 
 
   return (<>
     <div>{title}</div>

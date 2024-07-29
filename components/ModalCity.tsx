@@ -1,7 +1,7 @@
 "use client"
 
 import { saveCity } from "@/lib/actions"
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@nextui-org/react"
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Select, SelectItem, Textarea } from "@nextui-org/react"
 import axios from "axios"
 import { useState } from "react"
 import FormButton from "./form-button"
@@ -10,7 +10,10 @@ import { useFormState } from "react-dom"
 const ModalCity = ({ isOpen, onClose }: { isOpen: boolean, onClose: any }) => {
   const [loading, setLoading] = useState<boolean>();
   const [cities, setCities] = useState<[string] | []>([]);
-  const [formState, action] = useFormState(saveCity, null)
+  const [selectedCity, setSelectedCity] = useState();
+  const [street, setStreet] = useState<any>();
+  const [radioSelected, setRadioSelected] = useState<string>("current-city");
+  const [formState, action] = useFormState(saveCity.bind(null, street, selectedCity), null)
 
   console.log('formState', formState)
   if (formState === 'OK') {
@@ -38,6 +41,9 @@ const ModalCity = ({ isOpen, onClose }: { isOpen: boolean, onClose: any }) => {
   }
 
   console.log('cities', cities)
+  console.log('radio selected', radioSelected)
+
+  console.log('city selected', selectedCity)
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -47,19 +53,46 @@ const ModalCity = ({ isOpen, onClose }: { isOpen: boolean, onClose: any }) => {
             <ModalHeader className="flex flex-col gap-1">Indiquer une ville</ModalHeader>
             <ModalBody>
               <p>
-                Merci de renseigner votre code postal et ville, afin de vous connecter aux personnes qui habitent proches de chez vous
+                Merci de renseigner votre adresse précise SVP, qui sera le lieu de la vente avec l'acheteur
               </p>
               <Input name="cp" placeholder="code postal" onChange={cpChanged} />
 
               {loading && <div>Loading...</div>}
               {!loading && <Select
                 isRequired
+                selectionMode="single"
                 label="Ville"
-                name="city">
+                onChange={(ev:any)=>setSelectedCity(ev.target.value)}
+                >
                 {cities.map((city: any) => (
                   <SelectItem key={city}>{city}</SelectItem>
                 ))}
               </Select>}
+
+              <Textarea
+                      isRequired
+                      label="Numéro et nom de la rue"
+                      onValueChange={setStreet}
+                      placeholder="Numéro et nom de la rue"
+                    />
+              <div>
+                {/* <RadioGroup
+                  label="Voulez-vous utliser cette adresse pour rencontrer votre acheteur?"
+                  value={radioSelected}
+                  onValueChange={setRadioSelected}
+                >
+                  <Radio value="current-city">Oui</Radio>
+                  <Radio value="other-city">Non, veuillez préciser</Radio>
+                  <div>
+                    <Textarea
+                      disabled={radioSelected==='current-city'}
+                      label="Lieu de rencontre, soyez précis SVP"
+                      onValueChange={setCustoAddress}
+                      placeholder="Numéro, nom de la rue et ville"
+                    />
+                  </div>
+                </RadioGroup> */}
+              </div>
 
             </ModalBody>
 

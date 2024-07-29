@@ -15,8 +15,9 @@ export default async function Purchases() {
   .from("borrow")
   .select("*, user_book(*, user!inner(*), book!inner(*, category!inner(*)))")
   .eq("borrower_id", data.user.id)
-  .in("status", [BORROW_STATUS.PENDING, BORROW_STATUS.VALIDATED])
+  .in("status", [BORROW_STATUS.PENDING, BORROW_STATUS.VALIDATED, BORROW_STATUS.CANCELLED])
   .is('close_date', null)
+  .order('created_at', { ascending: false })
 
   // todo retrieve buyer name
   if (!purchases || purchases.length === 0) {

@@ -44,7 +44,7 @@ export default function ListBooksForm({ books, userId, askCity }: ListBooksFormP
           </div>
           <div>Auteur: {userBook.bookInfo.author}</div>
           <div>Catégorie: {userBook.bookInfo.category.name}</div>
-          <div>Propriétaire: {userBook.userInfo.user_name}</div>
+          <div>Lieu de: {userBook.userInfo.user_name}</div>
           <div>Etat: {userBook.state}</div>
           <div>Prix: {userBook.price}</div>
           <div>Statut:{" "}
@@ -56,18 +56,6 @@ export default function ListBooksForm({ books, userId, askCity }: ListBooksFormP
             {userBook.status === 'BORROWED' ? (
               <span>
                 Déjà Emprunté
-              </span>
-            ) : null}
-          </div>
-          <div>Mode d'échange souhaité:{" "}
-            {userBook.place === 'SELLER_HOME' ? (
-              <span>
-                Au domicile du vendeur
-              </span>
-            ) : null}
-            {userBook.place === 'TO_DEFINED' ? (
-              <span>
-                A définir au moment de la demande
               </span>
             ) : null}
           </div>

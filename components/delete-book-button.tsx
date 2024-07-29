@@ -7,18 +7,20 @@ import FormButton from "./form-button";
 
 export function DeleteBook({ userBookId }: { userBookId: number }) {
     const deleteBookAction = deleteBook.bind(null, userBookId)
-    // const [formState, action] = useFormState(deleteBookAction)
+    const [formState, action] = useFormState(deleteBookAction, {
+      message: ""
+    })   
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
   
     //TODO
-    // useEffect(() => {
-    //   if (formState.message) {
-    //     onOpen()
-    //   }
-    // }, [formState, onOpen])
+    useEffect(() => {
+      if (formState.message) {
+        onOpen()
+      }
+    }, [formState, onOpen])
   
     return (<>
-      <form action={deleteBookAction}>
+      <form action={action}>
         <FormButton>Delete</FormButton>
       </form>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>

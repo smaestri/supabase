@@ -31,7 +31,7 @@ interface CreateBookFormState {
 // }
 
 const saveUser = async (supabase: any, userId: any, userName: string) => {
-    console.log('saving user with id ', userId , " and name " + userName)
+    console.log('saving user with id ', userId, " and name " + userName)
     let { data: user } = await supabase
         .from("user")
         .select("*").eq("user_id", userId);
@@ -47,22 +47,23 @@ const saveUser = async (supabase: any, userId: any, userName: string) => {
     }
 }
 
-export const saveCity = async (formState: any, formData: any) => {
+export const saveCity = async (street: any, selectedCity: any, formState: any, formData: any) => {
+
+    console.log('save city with city ', selectedCity + " and cp " + formData.get('cp') + ' street', street)
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    console.log('save city with city ', formData.get('city') + " and cp " + formData.get('cp') )
-
     const { error: errorCity } = await supabase
-    .from('user')
-    .update({
-        cp: formData.get('cp'),
-        city: formData.get('city'),
-    })
-    .eq('user_id', user?.id)
+        .from('user')
+        .update({
+            cp: formData.get('cp'),
+            city: selectedCity,
+            street,
+        })
+        .eq('user_id', user?.id)
 
 
-    if(errorCity) {
+    if (errorCity) {
         console.log('error when updating city / cp')
         return 'KO';
     }
@@ -91,21 +92,21 @@ const saveBook = async (supabase: any, formData: any) => {
                 category_id: formData.get('category'),
                 image: formData.get('image'),
             })
-        
-            if (error) {
-                console.log('error when savingbook', error)
-                return
-            }
+
+        if (error) {
+            console.log('error when savingbook', error)
+            return
+        }
 
         let { data } = await supabase
             .from("book")
             .select("*").eq("isbn", isbn);
-            console.log('data', data)
-            if (error) {
-                console.log('error when getting book', error)
-                return
-            }
-            return data[0];
+        console.log('data', data)
+        if (error) {
+            console.log('error when getting book', error)
+            return
+        }
+        return data[0];
     }
     console.log('book already exists returning ', bookWithCategory[0])
 
@@ -113,14 +114,14 @@ const saveBook = async (supabase: any, formData: any) => {
 
 }
 
-const attachBookToUser = async (supabase: any, isbn: string, userId: any, state: string | null, price: string | null, place: string | null) => {
+const attachBookToUser = async (supabase: any, isbn: string, userId: any, state: string | null, price: string | null) => {
     let { data: bookWithCategory } = await supabase
         .from("user_book")
         .select("*")
-            .eq("user_id", userId)
-            .eq("book_isbn", isbn);
+        .eq("user_id", userId)
+        .eq("book_isbn", isbn);
     if (!bookWithCategory || bookWithCategory.length == 0) {
-        console.log('user_book not found, inserting with isbn', isbn, " and userId " + userId,  " and state " + state ,  " and price ", price)
+        console.log('user_book not found, inserting with isbn', isbn, " and userId " + userId, " and state " + state, " and price ", price)
         const { error } = await supabase
             .from('user_book')
             .insert({
@@ -128,7 +129,6 @@ const attachBookToUser = async (supabase: any, isbn: string, userId: any, state:
                 user_id: userId,
                 state,
                 price,
-                place
 
             })
         console.log('error when saving user_book ', error)
@@ -139,17 +139,15 @@ const attachBookToUser = async (supabase: any, isbn: string, userId: any, state:
 export async function createBook(formState: CreateBookFormState, formData: FormData): Promise<CreateBookFormState> {
     const supabase = createClient();
 
-    console.log('create' + formData.get('isbn') + " " + formData.get('title') + " " + formData.get('author')  + " " + formData.get('category') +" " +  formData.get('place')  + " " + formData.get('image'))
+    console.log('create' + formData.get('isbn') + " " + formData.get('title') + " " + formData.get('author') + " " + formData.get('category') + " " + formData.get('place') + " " + formData.get('image'))
     const { data: { user } } = await supabase.auth.getUser();
 
-console.log('user retrieved from oauth', (JSON.stringify(user)))
+    console.log('user retrieved from oauth', (JSON.stringify(user)))
 
     try {
         await saveUser(supabase, user?.id, user?.user_metadata["full_name"])
         const book: BookWithCategory = await saveBook(supabase, formData)
-        console.log('book inserted', book)
-        console.log('isbn', book.isbn)
-        await attachBookToUser(supabase, book.isbn, user?.id, formData.get('state') as string,  formData.get('price'), formData.get('place'))
+        await attachBookToUser(supabase, book.isbn, user?.id, formData.get('state') as string, formData.get('price'))
     } catch (err: unknown) {
         if (err instanceof Error) {
             return {
@@ -175,9 +173,26 @@ export async function deleteBook(id: number) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    //check if borrow attached
+    let { data: borrow } = await supabase
+        .from("user_book")
+        .select("*")
+        .eq("id", id)
+        .eq("status", "PURCHASED");
+
+    if (borrow && borrow.length > 0) {
+        console.log('error book pending!!', borrow)
+        return {
+            message: "The book is currently being borrowed, you can't delete it!"
+        }
+    }
+
+
     const { error } = await supabase
         .from('user_book')
-        .delete()
+        .update({
+            deleted: true,
+        })
         .eq('id', id)
 
     // console.log('delete book')
@@ -195,10 +210,28 @@ export async function deleteBook(id: number) {
     redirect('/my-books')
 }
 
-export async function validatePurchase(purchaseId: number) {
+export async function validatePurchase(purchaseId: number, street: any) {
+
     // TODO only if PENDING
-    console.log('validatePurchase',purchaseId)
+    console.log('validatePurchase', purchaseId)
     const supabase = createClient();
+
+    const { data: { user }, error: errConnect } = await supabase.auth.getUser()
+
+    if (street) {
+        console.log('updating street ', street)
+        const { error: errorValidatre } = await supabase
+            .from('user')
+            .update({
+                street,
+            })
+            .eq('user_id', user?.id)
+
+        if (errorValidatre) {
+            console.log('error during street update')
+        }
+
+    }
     const { error: errorValidatre } = await supabase
         .from('borrow')
         .update({
@@ -206,14 +239,30 @@ export async function validatePurchase(purchaseId: number) {
         })
         .eq('id', purchaseId)
 
-        revalidatePath('/sales')
-        redirect('/sales')
+    if (errorValidatre) {
+        console.log('error during borrows update')
+    }
+
+    revalidatePath('/sales')
+    redirect('/sales')
 }
 
-export async function refusePurchase(purchaseId: number, bookId: number) {
+export async function refusePurchase(purchaseId: number, bookId: number, motif: any, slot: any) {
     // TODO only if PENDING
-    console.log('refusePurchase',purchaseId)
+    console.log('refusePurchase', purchaseId, " book=", bookId, " motif= ", motif, " slot= " + slot)
     const supabase = createClient();
+    const { data: { user }, error: errConnect } = await supabase.auth.getUser()
+
+    if (motif == "INCORRECT_SLOT") {
+        const { error: errorMessage } = await supabase
+            .from('messages')
+            .insert({
+                borrow_id: purchaseId,
+                user_id: user?.id,
+                message: "Le créneau ne me convient pas, pouvez-vous refaire la demande sur ce créneau SVP: " + slot
+            })
+    }
+
     const { error: errorValidatre } = await supabase
         .from('borrow')
         .update({
@@ -221,10 +270,10 @@ export async function refusePurchase(purchaseId: number, bookId: number) {
         })
         .eq('id', purchaseId)
 
-        setBookToFree(bookId, supabase)
+    setBookToFree(bookId, supabase)
 
-        revalidatePath('/sales')
-        redirect('/sales')
+    revalidatePath('/sales')
+    redirect('/sales')
 }
 
 
@@ -234,7 +283,7 @@ export async function purchaseBook(bookId: number, rdvDate: any, message: string
 
     const supabase = createClient();
     const { data, error: errConnect } = await supabase.auth.getUser()
-    console.log('borrow book' + bookId + "and user" + data?.user?.id + "and first date" + rdvDate + "and first time" + formData.get("firstTime")  )
+    console.log('borrow book' + bookId + "and user" + data?.user?.id + "and first date" + rdvDate + "and first time" + formData.get("firstTime"))
 
     const { data: borrow, error } = await supabase
         .from('borrow')
@@ -246,10 +295,10 @@ export async function purchaseBook(bookId: number, rdvDate: any, message: string
         })
         .select()
 
-        if(error) {
-            console.log('error during borrow: ', error)
-            return; //todo error management
-        }
+    if (error) {
+        console.log('error during borrow: ', error)
+        return; //todo error management
+    }
 
 
     // need to retrieve id
@@ -265,39 +314,39 @@ export async function purchaseBook(bookId: number, rdvDate: any, message: string
             message
         })
 
-        if(errorMessage) {
-            console.log('error during inserting message ', error)
-            return; //todo error management
-        }
+    if (errorMessage) {
+        console.log('error during inserting message ', error)
+        return; //todo error management
+    }
 
 
     const { error: errorBOok } = await supabase
-    .from('user_book')
-    .update({
-        status: BOOK_STATUS.PURCHASED,
-    })
-    .eq('id', bookId)
+        .from('user_book')
+        .update({
+            status: BOOK_STATUS.PURCHASED,
+        })
+        .eq('id', bookId)
 
-    if(errorBOok) {
+    if (errorBOok) {
         console.log('error during updating book status: ', error)
         return; //todo error management
     }
-        
 
-     revalidatePath('/purchases')
-     redirect('/purchases')
+
+    revalidatePath('/purchases')
+    redirect('/purchases')
 }
 
 export async function closePurchase(borrowId: number, bookId: number) {
-    
+
     const supabase = createClient();
     const { error: errorBorrow } = await supabase
-    .from('borrow')
-    .update({
-        status: BORROW_STATUS.CLOSED,
-        close_date: new Date().toISOString()
-    })
-    .eq('id', borrowId)
+        .from('borrow')
+        .update({
+            status: BORROW_STATUS.CLOSED,
+            close_date: new Date().toISOString()
+        })
+        .eq('id', borrowId)
 
     setBookToFree(bookId, supabase)
 
@@ -310,11 +359,11 @@ export async function closePurchase(borrowId: number, bookId: number) {
 const setBookToFree = async (bookId: any, supabase: any) => {
 
     const { error: errorBook } = await supabase
-    .from('user_book')
-    .update({
-        status: BOOK_STATUS.FREE,
-    })
-    .eq('id', bookId)
+        .from('user_book')
+        .update({
+            status: BOOK_STATUS.FREE,
+        })
+        .eq('id', bookId)
 
 }
 
@@ -324,4 +373,29 @@ export async function search(formData: FormData) {
         redirect("/")
     }
     redirect(`/search?term=${term}`)
+}
+
+export async function addMessage(borrowId: any, message: string, isPurchase: any) {
+    const supabase = createClient();
+    const { data, error: errConnect } = await supabase.auth.getUser()
+
+    const { error: errorMessage } = await supabase
+        .from('messages')
+        .insert({
+            borrow_id: borrowId,
+            user_id: data?.user?.id,
+            message
+        })
+
+
+    if (isPurchase) {
+        revalidatePath('/purchases')
+        redirect('/purchases')
+    } else {
+        revalidatePath('/sales')
+        redirect('/sales')
+    }
+
+
+
 }

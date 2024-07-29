@@ -24,10 +24,6 @@ const states = [
   { id: "AVERAGE", label: "Moyen" },
   { id: "BAD", label: "Mauvais état" }]
 
-  const places = [
-    { id: "SELLER_HOME", label: "A mon adresse" },
-    { id: "TO_DEFINED", label: "A définir avec le demandeur" },
-  ]
 
 export default function CreateEditBookForm({ categories, book, userId }: CreateEditBookFormProps) {
   // need to transform ID in string to display Select correctly
@@ -102,14 +98,6 @@ export default function CreateEditBookForm({ categories, book, userId }: CreateE
         name="state">
         {(state: any) => (
           <SelectItem key={state.id} value={state.id} >{state.label}</SelectItem>
-        )}
-      </Select>
-      <Select
-        label="Lieu de la vente / du don"
-        items={places}
-        name="place">
-        {(place: any) => (
-          <SelectItem key={place.id} value={place.id}>{place.label}</SelectItem>
         )}
       </Select>
       <RadioGroup orientation="horizontal" onChange={togglePrice}>

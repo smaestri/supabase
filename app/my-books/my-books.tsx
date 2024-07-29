@@ -15,6 +15,7 @@ export default async function MyBooks() {
     .from("user_book")
     .select("*, user(*), book(*, category(*))")
     .eq("user_id", user?.id)
+    .eq("deleted", false)
     ;
      console.log('books', userBooks)
     if(error){
@@ -22,9 +23,11 @@ export default async function MyBooks() {
     }
 
     let askCity = false
-    if(userBooks && userBooks?.length > 0 && !userBooks[0].user.city) {
+    if(!userBooks || userBooks?.length == 0 || !userBooks[0].user.city || !userBooks[0].user.street) {
       askCity = true
     }
+
+    console.log('ask city', askCity)
 
     const finalBooks = userBooks?.map(item => ({id : item.id, place: item.place, state: item.state, price: item.price, bookInfo:item.book, userInfo: item.user}))
     console.log('books fetched', JSON.stringify(finalBooks))
